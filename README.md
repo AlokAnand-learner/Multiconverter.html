@@ -1,4 +1,4 @@
-# 📁 OmniConverter & Document Studio
+# 📁 MultiConverter & Document Studio
 
 A fast, lightweight, and 100% client-side document and media manipulation workstation. Everything runs offline in your web browser—no servers, no tracking, and complete privacy.
 
@@ -17,7 +17,7 @@ A fast, lightweight, and 100% client-side document and media manipulation workst
 ## 🚀 Live Demo
 
 Access the live tool directly on GitHub Pages:
-[Launch OmniConverter](https://alokanand-learner.github.io/Multiconverter.html/)
+[Launch MultiConverter](https://alokanand-learner.github.io/Multiconverter.html/)
 
 ---
 
@@ -35,3 +35,4 @@ Access the live tool directly on GitHub Pages:
 1. Clone the repository:
    ```bash
    git clone [https://github.com/AlokAnand-learner/Multiconverter.html.git](https://github.com/AlokAnand-learner/Multiconverter.html.git)
+
