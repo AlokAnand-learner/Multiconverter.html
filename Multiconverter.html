@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>OmniConverter & Document Studio</title>
   
-  <!-- Client-side PDF & Compression Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -21,13 +20,12 @@
       --text-muted: #94a3b8;
       --success: #34d399;
       --danger: #f87171;
-      --warning: #fbbf24;
     }
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
     body {
@@ -49,22 +47,12 @@
     header h1 {
       font-size: 17px;
       font-weight: 700;
-      letter-spacing: 0.5px;
       color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     header a {
       color: var(--text-muted);
       text-decoration: none;
       font-size: 13px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    header a:hover {
-      color: var(--text);
     }
     .nav-tabs {
       display: flex;
@@ -79,7 +67,6 @@
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 700;
-      letter-spacing: 0.5px;
       background: none;
       border: none;
       color: var(--text-muted);
@@ -89,7 +76,6 @@
       align-items: center;
       gap: 4px;
       border-bottom: 2px solid transparent;
-      transition: all 0.2s ease;
       white-space: nowrap;
     }
     .tab-btn.active {
@@ -120,7 +106,6 @@
     .card h3 {
       font-size: 15px;
       margin-bottom: 6px;
-      color: var(--text);
     }
     .card p.desc {
       font-size: 12px;
@@ -134,12 +119,7 @@
       padding: 24px 16px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
       background: rgba(11, 17, 32, 0.5);
-    }
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--primary);
-      background: rgba(56, 189, 248, 0.05);
     }
     .drop-zone input[type="file"] {
       display: none;
@@ -174,9 +154,6 @@
       font-size: 14px;
       outline: none;
     }
-    input:focus, select:focus {
-      border-color: var(--primary);
-    }
     .action-btn {
       background: var(--primary);
       color: #0b1120;
@@ -186,16 +163,7 @@
       padding: 12px 18px;
       font-size: 14px;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
       width: 100%;
-      transition: opacity 0.2s;
-    }
-    .action-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
     }
     .progress-box {
       margin-top: 14px;
@@ -228,7 +196,6 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      position: relative;
     }
     .preview-card img {
       width: 100%;
@@ -251,10 +218,6 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    .mini-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
     .stats-card {
       background: rgba(52, 211, 153, 0.08);
       border: 1px solid rgba(52, 211, 153, 0.3);
@@ -269,8 +232,8 @@
 <body>
 
   <header>
-    <h1><span>📁</span> OmniConverter</h1>
-    <a href="index.html"><span>←</span> MultiTranslate Hub</a>
+    <h1>📁 OmniConverter</h1>
+    <a href="index.html">← MultiTranslate Hub</a>
   </header>
 
   <nav class="nav-tabs">
@@ -298,7 +261,7 @@
     <div id="tab-compress" class="tab-pane active">
       <div class="card">
         <h3>Target Size Document &amp; Image Compressor</h3>
-        <p class="desc">Specify your target ceiling size. The optimizer runs an automated bisection loop to hit within bounds while maximizing visual clarity.</p>
+        <p class="desc">Enter your target size (magnitude and unit). The algorithm balances resolution and quality to meet the target limit.</p>
 
         <div class="drop-zone" onclick="document.getElementById('compFile').click()">
           <span class="drop-icon">📤</span>
@@ -313,7 +276,7 @@
 
         <div class="form-grid">
           <div class="form-group">
-            <label for="compMagnitude">Target Size (Magnitude)</label>
+            <label for="compMagnitude">Target Magnitude</label>
             <input type="number" id="compMagnitude" placeholder="e.g. 200" min="1" step="any" value="200" />
           </div>
           <div class="form-group">
@@ -427,7 +390,7 @@
     <div id="tab-img-convert" class="tab-pane">
       <div class="card">
         <h3>Image Format Switcher</h3>
-        <p class="desc">Quickly convert standalone images between WEBP, PNG, and JPG formats.</p>
+        <p class="desc">Convert standalone images between WEBP, PNG, and JPG formats.</p>
 
         <div class="drop-zone" onclick="document.getElementById('formatSwitchFile').click()">
           <span class="drop-icon">🔄</span>
@@ -461,7 +424,6 @@
   </div>
 
   <script>
-    // Initialize PDF.js worker
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
     function switchTab(tabId) {
@@ -482,9 +444,6 @@
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
-    /* -------------------------------------------------------------
-       MODULE 1: TARGET SIZE COMPRESSOR (PDF & IMAGES)
-    ------------------------------------------------------------- */
     let selectedCompressFile = null;
     let compressedBlobResult = null;
     let compressedFileName = '';
@@ -515,7 +474,7 @@
 
       const targetBytes = unit === 'MB' ? mag * 1024 * 1024 : mag * 1024;
       if (targetBytes >= selectedCompressFile.size) {
-        alert('Target size is larger than or equal to current file size. No compression needed.');
+        alert('Target size is larger than or equal to current file size.');
         return;
       }
 
@@ -527,7 +486,7 @@
       progressBox.style.display = 'block';
       statsCard.style.display = 'none';
       progressBar.style.width = '10%';
-      progressText.innerText = 'Analyzing file structure...';
+      progressText.innerText = 'Analyzing file...';
 
       const isPdf = selectedCompressFile.type === 'application/pdf' || selectedCompressFile.name.toLowerCase().endsWith('.pdf');
 
@@ -556,7 +515,7 @@
         document.getElementById('compStatsBody').innerHTML = `
           Original: <strong>${formatBytes(originalSize)}</strong> &nbsp;➔&nbsp; 
           Final: <strong>${formatBytes(finalSize)}</strong><br>
-          Reduced by: <strong style="color:var(--success);">${savedPercent}%</strong> (Target: ${mag} ${unit})
+          Reduced by: <strong style="color:var(--success);">${savedPercent}%</strong>
         `;
 
         document.getElementById('compDownloadBtn').onclick = () => {
@@ -589,10 +548,9 @@
       let bestBlob = null;
       let scale = 1.0;
 
-      // Iterative bisection search
       for (let iter = 0; iter < 6; iter++) {
         const midQ = (lowQ + highQ) / 2;
-        onProgress(30 + iter * 12, `Calibrating quality factor (${Math.round(midQ * 100)}%)...`);
+        onProgress(30 + iter * 12, `Calibrating quality (${Math.round(midQ * 100)}%)...`);
 
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * scale);
@@ -604,11 +562,11 @@
 
         if (currentBlob.size <= targetBytes) {
           bestBlob = currentBlob;
-          lowQ = midQ; // Try to maximize quality without crossing target
+          lowQ = midQ;
         } else {
           highQ = midQ;
           if (midQ <= 0.12 && scale > 0.4) {
-            scale *= 0.8; // Downscale dimensions if quality floor is reached
+            scale *= 0.8;
             lowQ = 0.1;
             highQ = 0.85;
           }
@@ -617,7 +575,6 @@
 
       URL.revokeObjectURL(blobUrl);
       if (!bestBlob) {
-        // Fallback to lowest possible viable render
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(img.width * 0.4);
         canvas.height = Math.round(img.height * 0.4);
@@ -635,22 +592,20 @@
 
       let quality = 0.6;
       let scale = 1.0;
-      let finalPdfBlob = null;
 
-      // Estimate byte budget per page
       const perPageBudget = targetBytes / numPages;
       if (perPageBudget < 25000) {
         scale = 0.75;
         quality = 0.45;
       }
 
-      onProgress(25, `Extracting and optimizing ${numPages} pages...`);
+      onProgress(25, `Processing ${numPages} pages...`);
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ unit: 'pt' });
 
       for (let i = 1; i <= numPages; i++) {
-        onProgress(25 + Math.round((i / numPages) * 60), `Compressing page ${i} of ${numPages}...`);
+        onProgress(25 + Math.round((i / numPages) * 60), `Processing page ${i} of ${numPages}...`);
         const page = await pdf.getPage(i);
         const viewport = page.getViewport({ scale });
 
@@ -669,13 +624,9 @@
         doc.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height);
       }
 
-      finalPdfBlob = doc.output('blob');
-      return finalPdfBlob;
+      return doc.output('blob');
     }
 
-    /* -------------------------------------------------------------
-       MODULE 2: PDF TO IMAGES
-    ------------------------------------------------------------- */
     let pdfToImgPages = [];
 
     function handlePdfToImgSelect(e) {
@@ -687,7 +638,7 @@
     async function convertPdfToImages() {
       const fileInput = document.getElementById('pdfToImgFile');
       if (!fileInput.files[0]) {
-        alert('Please choose a PDF file.');
+        alert('Please select a PDF file.');
         return;
       }
 
@@ -767,9 +718,6 @@
       URL.revokeObjectURL(url);
     }
 
-    /* -------------------------------------------------------------
-       MODULE 3: IMAGES TO PDF
-    ------------------------------------------------------------- */
     let sequenceImages = [];
 
     function handleImagesToPdfSelect(e) {
@@ -865,9 +813,6 @@
       doc.save('Compiled_Document.pdf');
     }
 
-    /* -------------------------------------------------------------
-       MODULE 4: FORMAT SWITCHER
-    ------------------------------------------------------------- */
     let formatSwitchImgData = null;
     let formatSwitchFileName = '';
 
