@@ -1,860 +1,729 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>OmniConverter & Document Studio</title>
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MultiConverter — Offline Document & Image Suite</title>
+
+  <!-- External Libraries (Client-Side Only) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root {
-      --bg: #0b1120;
-      --card-bg: #151e32;
-      --border: #24324f;
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #334155;
+      --border: #334155;
       --primary: #38bdf8;
-      --accent: #818cf8;
-      --text: #f1f5f9;
+      --primary-hover: #0ea5e9;
+      --primary-glow: rgba(56, 189, 248, 0.15);
+      --text: #f8fafc;
       --text-muted: #94a3b8;
-      --success: #34d399;
-      --danger: #f87171;
+      --danger: #ef4444;
+      --success: #10b981;
+      --radius: 12px;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
     }
+
     body {
-      background: var(--bg);
+      background-color: var(--bg);
       color: var(--text);
+      font-family: var(--font);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      padding-bottom: 50px;
+      overflow-x: hidden;
     }
+
     header {
-      background: #0f172a;
+      padding: 1.25rem 1rem;
       border-bottom: 1px solid var(--border);
-      padding: 16px 20px;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-container {
+      max-width: 1000px;
+      margin: 0 auto;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
     }
-    header h1 {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-    header a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 13px;
-    }
-    .nav-tabs {
+
+    .brand {
       display: flex;
-      background: #0f172a;
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-    }
-    .tab-btn {
-      flex: 1;
-      min-width: 90px;
-      padding: 12px 6px;
-      font-size: 11px;
-      text-transform: uppercase;
+      align-items: center;
+      gap: 0.6rem;
       font-weight: 700;
-      background: none;
+      font-size: 1.2rem;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .brand-badge {
+      background: var(--primary);
+      color: #04101e;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem 1rem;
+      flex: 1;
+    }
+
+    .hero-text {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-text h1 {
+      font-size: 1.85rem;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-text p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* Tabs Navigation */
+    .tabs-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0.25rem;
+      border-radius: var(--radius);
+      width: max-content;
+      margin: 0 auto;
+      gap: 0.25rem;
+    }
+
+    .tab-btn {
+      background: transparent;
       border: none;
       color: var(--text-muted);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 4px;
-      border-bottom: 2px solid transparent;
+      gap: 0.4rem;
       white-space: nowrap;
+      transition: all 0.2s ease;
     }
+
+    .tab-btn:hover {
+      color: var(--text);
+    }
+
     .tab-btn.active {
-      color: var(--primary);
-      border-bottom-color: var(--primary);
-      background: rgba(56, 189, 248, 0.05);
+      background: var(--primary);
+      color: #04101e;
     }
-    .container {
-      padding: 16px;
-      max-width: 720px;
-      margin: 0 auto;
-      width: 100%;
-      flex: 1;
-    }
-    .tab-pane {
+
+    /* Workspace Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
       display: none;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
-    .tab-pane.active {
+
+    .card.active {
       display: block;
     }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .card h3 {
-      font-size: 15px;
-      margin-bottom: 6px;
-    }
-    .card p.desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-      line-height: 1.4;
-    }
-    .drop-zone {
+
+    /* Drop Zone */
+    .dropzone {
       border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 24px 16px;
+      border-radius: var(--radius);
+      padding: 2.25rem 1rem;
       text-align: center;
       cursor: pointer;
-      background: rgba(11, 17, 32, 0.5);
+      background: rgba(15, 23, 42, 0.4);
+      transition: all 0.2s ease;
+      position: relative;
     }
-    .drop-zone input[type="file"] {
-      display: none;
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-glow);
     }
-    .drop-icon {
-      font-size: 32px;
-      margin-bottom: 8px;
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .dropzone-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
       display: block;
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 14px 0;
+
+    .dropzone-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 0.25rem;
     }
-    .form-group {
+
+    .dropzone-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    /* Configuration Panel */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .input-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 0.4rem;
     }
-    label {
-      font-size: 12px;
+
+    .input-group label {
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-muted);
     }
-    input, select {
-      background: #0b1120;
+
+    .input-field, select {
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
       color: var(--text);
-      padding: 10px;
-      font-size: 14px;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.9rem;
       outline: none;
-    }
-    .action-btn {
-      background: var(--primary);
-      color: #0b1120;
-      font-weight: 700;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 18px;
-      font-size: 14px;
-      cursor: pointer;
       width: 100%;
+      transition: border 0.2s;
     }
-    .progress-box {
-      margin-top: 14px;
-      display: none;
+
+    .input-field:focus, select:focus {
+      border-color: var(--primary);
     }
-    .progress-bar {
-      height: 6px;
-      background: #0b1120;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
+
+    /* Primary Action Buttons */
+    .btn-action {
       background: var(--primary);
-      transition: width 0.2s ease;
+      color: #04101e;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      transition: background 0.2s;
     }
-    .preview-grid {
+
+    .btn-action:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Preview Gallery */
+    .preview-container {
+      margin-top: 1.25rem;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-      margin-top: 14px;
+      gap: 0.75rem;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
     }
-    .preview-card {
-      background: #0b1120;
+
+    .preview-item {
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 8px;
+      padding: 0.5rem;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-    .preview-card img {
-      width: 100%;
-      height: 110px;
-      object-fit: cover;
-      border-radius: 4px;
-      background: #000;
-    }
-    .preview-actions {
-      display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.4rem;
+      position: relative;
     }
-    .mini-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 11px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
+
+    .preview-item img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 6px;
     }
-    .stats-card {
-      background: rgba(52, 211, 153, 0.08);
-      border: 1px solid rgba(52, 211, 153, 0.3);
-      padding: 12px;
+
+    .preview-name {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    /* Progress & Output */
+    .output-box {
+      margin-top: 1.25rem;
+      padding: 1rem;
       border-radius: 8px;
-      margin-top: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
       display: none;
-      font-size: 13px;
+    }
+
+    .output-box.show {
+      display: block;
+    }
+
+    .status-text {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 8px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 0.75rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      .hero-text h1 {
+        font-size: 1.5rem;
+      }
+      .card {
+        padding: 1rem;
+      }
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>📁 OmniConverter</h1>
-    <a href="index.html">← MultiTranslate Hub</a>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <span>⚡ MultiConverter</span>
+        <span class="brand-badge">Offline</span>
+      </a>
+      <span style="font-size: 0.8rem; color: var(--text-muted);">100% Client-Side</span>
+    </div>
   </header>
 
-  <nav class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-compress')">
-      <span>🗜️</span>
-      <span>Target Compress</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('tab-pdf-to-img')">
-      <span>📄 ➔ 🖼️</span>
-      <span>PDF to Image</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('tab-img-to-pdf')">
-      <span>🖼️ ➔ 📄</span>
-      <span>Images to PDF</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('tab-img-convert')">
-      <span>🔄</span>
-      <span>Format Switcher</span>
-    </button>
-  </nav>
+  <main class="container">
+    <div class="hero-text">
+      <h1>MultiConverter Studio</h1>
+      <p>Compress, convert, and merge documents & images directly in your browser.</p>
+    </div>
 
-  <div class="container">
-    
-    <!-- TAB 1: TARGET SIZE COMPRESSOR -->
-    <div id="tab-compress" class="tab-pane active">
-      <div class="card">
-        <h3>Target Size Document &amp; Image Compressor</h3>
-        <p class="desc">Enter your target size (magnitude and unit). The algorithm balances resolution and quality to meet the target limit.</p>
-
-        <div class="drop-zone" onclick="document.getElementById('compFile').click()">
-          <span class="drop-icon">📤</span>
-          <strong>Tap or drop file here</strong>
-          <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Supports PDF, JPG, PNG, WEBP</p>
-          <input type="file" id="compFile" accept="application/pdf,image/*" onchange="handleCompressFileSelect(event)" />
-        </div>
-
-        <div id="compFileMeta" style="margin-top:10px; font-size:12px; color:var(--text-muted); display:none;">
-          Selected: <strong id="compFileName" style="color:var(--text);"></strong> (<span id="compFileSize"></span>)
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="compMagnitude">Target Magnitude</label>
-            <input type="number" id="compMagnitude" placeholder="e.g. 200" min="1" step="any" value="200" />
-          </div>
-          <div class="form-group">
-            <label for="compUnit">Unit</label>
-            <select id="compUnit">
-              <option value="KB" selected>Kilobytes (KB)</option>
-              <option value="MB">Megabytes (MB)</option>
-            </select>
-          </div>
-        </div>
-
-        <button class="action-btn" id="compBtn" onclick="runTargetCompression()">Compress File</button>
-
-        <div class="progress-box" id="compProgressBox">
-          <span style="font-size:12px; color:var(--text-muted);" id="compProgressText">Processing...</span>
-          <div class="progress-bar"><div class="progress-fill" id="compProgressBar"></div></div>
-        </div>
-
-        <div class="stats-card" id="compStatsCard">
-          <div style="font-weight:700; color:var(--success); margin-bottom:4px;">✓ Compression Complete</div>
-          <div id="compStatsBody"></div>
-          <button class="action-btn" id="compDownloadBtn" style="margin-top:10px; background:var(--success); color:#064e3b;">Download File</button>
-        </div>
+    <!-- Navigation Tabs -->
+    <div class="tabs-wrapper">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('compressor')">🗜️ Size Compressor</button>
+        <button class="tab-btn" onclick="switchTab('pdf2img')">📄 PDF to Images</button>
+        <button class="tab-btn" onclick="switchTab('img2pdf')">🖼️ Images to PDF</button>
+        <button class="tab-btn" onclick="switchTab('converter')">🔄 Format Switcher</button>
       </div>
     </div>
 
-    <!-- TAB 2: PDF TO IMAGES -->
-    <div id="tab-pdf-to-img" class="tab-pane">
-      <div class="card">
-        <h3>PDF to Image Extractor</h3>
-        <p class="desc">Convert each page of a PDF document into a high-resolution image file.</p>
-
-        <div class="drop-zone" onclick="document.getElementById('pdfToImgFile').click()">
-          <span class="drop-icon">📑</span>
-          <strong>Select a PDF file</strong>
-          <input type="file" id="pdfToImgFile" accept="application/pdf" onchange="handlePdfToImgSelect(event)" />
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="pdfImgFormat">Output Format</label>
-            <select id="pdfImgFormat">
-              <option value="image/jpeg" selected>JPG (Standard)</option>
-              <option value="image/png">PNG (Lossless)</option>
-              <option value="image/webp">WEBP (Web Optimized)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="pdfImgScale">Resolution Quality</label>
-            <select id="pdfImgScale">
-              <option value="1.0">Standard (72 - 96 DPI)</option>
-              <option value="1.5" selected>Balanced (150 DPI)</option>
-              <option value="2.0">Crisp / Print (200+ DPI)</option>
-            </select>
-          </div>
-        </div>
-
-        <button class="action-btn" id="pdfExtractBtn" onclick="convertPdfToImages()">Extract Pages</button>
-
-        <div class="progress-box" id="pdfExtractProgressBox">
-          <span style="font-size:12px; color:var(--text-muted);" id="pdfExtractProgressText">Rendering pages...</span>
-          <div class="progress-bar"><div class="progress-fill" id="pdfExtractProgressBar"></div></div>
-        </div>
-
-        <div style="margin-top:14px; display:none;" id="pdfZipAction">
-          <button class="action-btn" style="background:var(--accent); color:#fff;" onclick="downloadAllPagesZip()">Download All Pages as .ZIP 📦</button>
-        </div>
-
-        <div class="preview-grid" id="pdfPagesGrid"></div>
+    <!-- Tab 1: Compressor -->
+    <section id="compressor" class="card active">
+      <div class="dropzone" id="drop-compress">
+        <input type="file" id="compress-file" accept="image/*,application/pdf">
+        <span class="dropzone-icon">📥</span>
+        <div class="dropzone-title">Select or drop an image or PDF</div>
+        <div class="dropzone-sub">Files are compressed locally on your computer</div>
       </div>
-    </div>
 
-    <!-- TAB 3: IMAGES TO PDF -->
-    <div id="tab-img-to-pdf" class="tab-pane">
-      <div class="card">
-        <h3>Compile Images into PDF</h3>
-        <p class="desc">Upload multiple photos or scans, arrange their page order, and generate a unified PDF document.</p>
-
-        <div class="drop-zone" onclick="document.getElementById('imgToPdfFiles').click()">
-          <span class="drop-icon">🖼️</span>
-          <strong>Select one or multiple images</strong>
-          <input type="file" id="imgToPdfFiles" accept="image/*" multiple onchange="handleImagesToPdfSelect(event)" />
+      <div class="controls-grid">
+        <div class="input-group">
+          <label for="target-size">Target Size</label>
+          <input type="number" id="target-size" class="input-field" placeholder="e.g. 200" value="200">
         </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="imgPdfPageSize">Page Dimension</label>
-            <select id="imgPdfPageSize">
-              <option value="fit" selected>Fit to Image (No Borders)</option>
-              <option value="a4_portrait">A4 Portrait</option>
-              <option value="a4_landscape">A4 Landscape</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="imgPdfMargin">Margin</label>
-            <select id="imgPdfMargin">
-              <option value="0" selected>None (0mm)</option>
-              <option value="5">Narrow (5mm)</option>
-              <option value="10">Standard (10mm)</option>
-            </select>
-          </div>
+        <div class="input-group">
+          <label for="size-unit">Unit</label>
+          <select id="size-unit">
+            <option value="KB">Kilobytes (KB)</option>
+            <option value="MB">Megabytes (MB)</option>
+          </select>
         </div>
-
-        <div class="preview-grid" id="imgSequenceGrid"></div>
-
-        <button class="action-btn" style="margin-top:14px;" id="compilePdfBtn" onclick="compileImagesToPdf()">Compile &amp; Download PDF</button>
       </div>
-    </div>
 
-    <!-- TAB 4: FORMAT SWITCHER -->
-    <div id="tab-img-convert" class="tab-pane">
-      <div class="card">
-        <h3>Image Format Switcher</h3>
-        <p class="desc">Convert standalone images between WEBP, PNG, and JPG formats.</p>
+      <button class="btn-action" id="btn-run-compress" onclick="runCompression()">Compress File</button>
 
-        <div class="drop-zone" onclick="document.getElementById('formatSwitchFile').click()">
-          <span class="drop-icon">🔄</span>
-          <strong>Select an image to switch</strong>
-          <input type="file" id="formatSwitchFile" accept="image/*" onchange="handleFormatSwitchSelect(event)" />
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="targetFormat">Target Format</label>
-            <select id="targetFormat">
-              <option value="image/jpeg">JPG</option>
-              <option value="image/png" selected>PNG</option>
-              <option value="image/webp">WEBP</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="formatQuality">Encoding Quality</label>
-            <select id="formatQuality">
-              <option value="1.0">100% (Maximum)</option>
-              <option value="0.92" selected>92% (High)</option>
-              <option value="0.80">80% (Medium)</option>
-            </select>
-          </div>
-        </div>
-
-        <button class="action-btn" onclick="executeFormatSwitch()">Convert &amp; Download</button>
+      <div class="output-box" id="compress-output">
+        <div class="status-text" id="compress-status">Ready</div>
+        <div class="progress-bar"><div class="progress-fill" id="compress-progress"></div></div>
+        <div id="compress-download"></div>
       </div>
-    </div>
+    </section>
 
-  </div>
+    <!-- Tab 2: PDF to Images -->
+    <section id="pdf2img" class="card">
+      <div class="dropzone">
+        <input type="file" id="pdf2img-file" accept="application/pdf">
+        <span class="dropzone-icon">📄</span>
+        <div class="dropzone-title">Select a PDF Document</div>
+        <div class="dropzone-sub">Extract every page into high-quality images</div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="input-group">
+          <label for="pdf2img-format">Image Format</label>
+          <select id="pdf2img-format">
+            <option value="image/jpeg">JPG</option>
+            <option value="image/png">PNG</option>
+            <option value="image/webp">WEBP</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-action" onclick="runPdfToImages()">Extract Pages</button>
+
+      <div class="output-box" id="pdf2img-output">
+        <div class="status-text" id="pdf2img-status">Processing...</div>
+        <div class="progress-bar"><div class="progress-fill" id="pdf2img-progress"></div></div>
+        <div id="pdf2img-download"></div>
+      </div>
+    </section>
+
+    <!-- Tab 3: Images to PDF -->
+    <section id="img2pdf" class="card">
+      <div class="dropzone">
+        <input type="file" id="img2pdf-files" accept="image/*" multiple onchange="handleImageSelection(event)">
+        <span class="dropzone-icon">🖼️</span>
+        <div class="dropzone-title">Select or Drop Multiple Images</div>
+        <div class="dropzone-sub">Combine all images into a single PDF</div>
+      </div>
+
+      <div class="preview-container" id="img2pdf-previews"></div>
+
+      <div class="controls-grid">
+        <div class="input-group">
+          <label for="img2pdf-format">Page Layout</label>
+          <select id="img2pdf-format">
+            <option value="fit">Fit to Image Size</option>
+            <option value="a4">Standard A4</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-action" onclick="runImagesToPdf()">Generate PDF</button>
+
+      <div class="output-box" id="img2pdf-output">
+        <div class="status-text" id="img2pdf-status">Ready</div>
+        <div class="progress-bar"><div class="progress-fill" id="img2pdf-progress"></div></div>
+        <div id="img2pdf-download"></div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Format Switcher -->
+    <section id="converter" class="card">
+      <div class="dropzone">
+        <input type="file" id="convert-file" accept="image/*">
+        <span class="dropzone-icon">🔄</span>
+        <div class="dropzone-title">Select an Image to Convert</div>
+        <div class="dropzone-sub">Instant in-browser format conversion</div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="input-group">
+          <label for="convert-target">Target Format</label>
+          <select id="convert-target">
+            <option value="image/png">PNG</option>
+            <option value="image/jpeg">JPG</option>
+            <option value="image/webp">WEBP</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-action" onclick="runFormatConversion()">Convert Format</button>
+
+      <div class="output-box" id="convert-output">
+        <div class="status-text" id="convert-status">Ready</div>
+        <div id="convert-download"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    MultiConverter — Zero upload, local browser document manipulation engine.
+  </footer>
 
   <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
+    // Tab Switching
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
       document.getElementById(tabId).classList.add('active');
-
-      const tabs = ['tab-compress', 'tab-pdf-to-img', 'tab-img-to-pdf', 'tab-img-convert'];
-      const index = tabs.indexOf(tabId);
-      if (index !== -1) document.querySelectorAll('.tab-btn')[index].classList.add('active');
     }
 
-    function formatBytes(bytes) {
-      if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    // Helper: Trigger File Download
+    function triggerDownload(blob, filename, targetElementId) {
+      const url = URL.createObjectURL(blob);
+      const container = document.getElementById(targetElementId);
+      container.innerHTML = `
+        <a href="${url}" download="${filename}" class="btn-action" style="margin-top: 0.5rem; text-decoration: none;">
+          ⬇️ Download ${filename} (${(blob.size / 1024).toFixed(1)} KB)
+        </a>
+      `;
     }
 
-    let selectedCompressFile = null;
-    let compressedBlobResult = null;
-    let compressedFileName = '';
+    // Tab 1: Compression Implementation
+    async function runCompression() {
+      const input = document.getElementById('compress-file');
+      if (!input.files.length) return alert('Please choose an image or PDF first.');
 
-    function handleCompressFileSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      selectedCompressFile = file;
+      const file = input.files[0];
+      const targetSize = parseFloat(document.getElementById('target-size').value);
+      const unit = document.getElementById('size-unit').value;
+      const targetBytes = targetSize * (unit === 'MB' ? 1024 * 1024 : 1024);
 
-      document.getElementById('compFileMeta').style.display = 'block';
-      document.getElementById('compFileName').innerText = file.name;
-      document.getElementById('compFileSize').innerText = formatBytes(file.size);
-      document.getElementById('compStatsCard').style.display = 'none';
-    }
+      const out = document.getElementById('compress-output');
+      const status = document.getElementById('compress-status');
+      const progress = document.getElementById('compress-progress');
+      out.classList.add('show');
+      status.innerText = "Analyzing file...";
+      progress.style.width = "20%";
 
-    async function runTargetCompression() {
-      if (!selectedCompressFile) {
-        alert('Please select a file first.');
-        return;
-      }
-
-      const mag = parseFloat(document.getElementById('compMagnitude').value);
-      const unit = document.getElementById('compUnit').value;
-      if (isNaN(mag) || mag <= 0) {
-        alert('Please enter a valid positive target magnitude.');
-        return;
-      }
-
-      const targetBytes = unit === 'MB' ? mag * 1024 * 1024 : mag * 1024;
-      if (targetBytes >= selectedCompressFile.size) {
-        alert('Target size is larger than or equal to current file size.');
-        return;
-      }
-
-      const progressBox = document.getElementById('compProgressBox');
-      const progressBar = document.getElementById('compProgressBar');
-      const progressText = document.getElementById('compProgressText');
-      const statsCard = document.getElementById('compStatsCard');
-
-      progressBox.style.display = 'block';
-      statsCard.style.display = 'none';
-      progressBar.style.width = '10%';
-      progressText.innerText = 'Analyzing file...';
-
-      const isPdf = selectedCompressFile.type === 'application/pdf' || selectedCompressFile.name.toLowerCase().endsWith('.pdf');
-
-      try {
-        if (isPdf) {
-          compressedBlobResult = await compressPdfToTarget(selectedCompressFile, targetBytes, (pct, status) => {
-            progressBar.style.width = pct + '%';
-            progressText.innerText = status;
-          });
-          compressedFileName = selectedCompressFile.name.replace(/\.pdf$/i, '_compressed.pdf');
-        } else {
-          compressedBlobResult = await compressImageToTarget(selectedCompressFile, targetBytes, (pct, status) => {
-            progressBar.style.width = pct + '%';
-            progressText.innerText = status;
-          });
-          compressedFileName = selectedCompressFile.name.replace(/\.[^/.]+$/, '') + '_compressed.jpg';
-        }
-
-        progressBox.style.display = 'none';
-        statsCard.style.display = 'block';
-
-        const originalSize = selectedCompressFile.size;
-        const finalSize = compressedBlobResult.size;
-        const savedPercent = Math.max(0, ((originalSize - finalSize) / originalSize) * 100).toFixed(1);
-
-        document.getElementById('compStatsBody').innerHTML = `
-          Original: <strong>${formatBytes(originalSize)}</strong> &nbsp;➔&nbsp; 
-          Final: <strong>${formatBytes(finalSize)}</strong><br>
-          Reduced by: <strong style="color:var(--success);">${savedPercent}%</strong>
-        `;
-
-        document.getElementById('compDownloadBtn').onclick = () => {
-          const url = URL.createObjectURL(compressedBlobResult);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = compressedFileName;
-          a.click();
-          URL.revokeObjectURL(url);
-        };
-
-      } catch (err) {
-        progressBox.style.display = 'none';
-        alert('Compression Error: ' + err.message);
-      }
-    }
-
-    async function compressImageToTarget(file, targetBytes, onProgress) {
-      const img = new Image();
-      const arrayBuffer = await file.arrayBuffer();
-      const blobUrl = URL.createObjectURL(new Blob([arrayBuffer]));
-      
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = blobUrl;
-      });
-
-      let lowQ = 0.05, highQ = 0.95;
-      let bestBlob = null;
-      let scale = 1.0;
-
-      for (let iter = 0; iter < 6; iter++) {
-        const midQ = (lowQ + highQ) / 2;
-        onProgress(30 + iter * 12, `Calibrating quality (${Math.round(midQ * 100)}%)...`);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        const currentBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', midQ));
-
-        if (currentBlob.size <= targetBytes) {
-          bestBlob = currentBlob;
-          lowQ = midQ;
-        } else {
-          highQ = midQ;
-          if (midQ <= 0.12 && scale > 0.4) {
-            scale *= 0.8;
-            lowQ = 0.1;
-            highQ = 0.85;
-          }
-        }
-      }
-
-      URL.revokeObjectURL(blobUrl);
-      if (!bestBlob) {
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.round(img.width * 0.4);
-        canvas.height = Math.round(img.height * 0.4);
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        bestBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.2));
-      }
-      return bestBlob;
-    }
-
-    async function compressPdfToTarget(file, targetBytes, onProgress) {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const numPages = pdf.numPages;
-
-      let quality = 0.6;
-      let scale = 1.0;
-
-      const perPageBudget = targetBytes / numPages;
-      if (perPageBudget < 25000) {
-        scale = 0.75;
-        quality = 0.45;
-      }
-
-      onProgress(25, `Processing ${numPages} pages...`);
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'pt' });
-
-      for (let i = 1; i <= numPages; i++) {
-        onProgress(25 + Math.round((i / numPages) * 60), `Processing page ${i} of ${numPages}...`);
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale });
-
-        const canvas = document.createElement('canvas');
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        const ctx = canvas.getContext('2d');
-
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        const imgData = canvas.toDataURL('image/jpeg', quality);
-
-        if (i > 1) doc.addPage([viewport.width, viewport.height]);
-        else doc.setPage(1);
-
-        doc.addImage(imgData, 'JPEG', 0, 0, viewport.width, viewport.height);
-      }
-
-      return doc.output('blob');
-    }
-
-    let pdfToImgPages = [];
-
-    function handlePdfToImgSelect(e) {
-      pdfToImgPages = [];
-      document.getElementById('pdfPagesGrid').innerHTML = '';
-      document.getElementById('pdfZipAction').style.display = 'none';
-    }
-
-    async function convertPdfToImages() {
-      const fileInput = document.getElementById('pdfToImgFile');
-      if (!fileInput.files[0]) {
-        alert('Please select a PDF file.');
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const format = document.getElementById('pdfImgFormat').value;
-      const scale = parseFloat(document.getElementById('pdfImgScale').value);
-      const ext = format === 'image/png' ? 'png' : (format === 'image/webp' ? 'webp' : 'jpg');
-
-      const progressBox = document.getElementById('pdfExtractProgressBox');
-      const progressBar = document.getElementById('pdfExtractProgressBar');
-      const progressText = document.getElementById('pdfExtractProgressText');
-      const grid = document.getElementById('pdfPagesGrid');
-
-      progressBox.style.display = 'block';
-      grid.innerHTML = '';
-      pdfToImgPages = [];
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        const numPages = pdf.numPages;
-
-        for (let i = 1; i <= numPages; i++) {
-          progressBar.style.width = Math.round((i / numPages) * 100) + '%';
-          progressText.innerText = `Extracting page ${i} of ${numPages}...`;
-
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale });
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          const ctx = canvas.getContext('2d');
-
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
-          const dataUrl = canvas.toDataURL(format, 0.9);
-          pdfToImgPages.push({ pageNum: i, dataUrl, ext });
-
-          const card = document.createElement('div');
-          card.className = 'preview-card';
-          card.innerHTML = `
-            <img src="${dataUrl}" alt="Page ${i}" />
-            <div class="preview-actions">
-              <span style="font-size:11px;">Page ${i}</span>
-              <a href="${dataUrl}" download="Page_${i}.${ext}" class="mini-btn" style="text-decoration:none;">Save</a>
-            </div>
-          `;
-          grid.appendChild(card);
-        }
-
-        progressBox.style.display = 'none';
-        if (numPages > 1) {
-          document.getElementById('pdfZipAction').style.display = 'block';
-        }
-
-      } catch (err) {
-        progressBox.style.display = 'none';
-        alert('PDF Extraction Failed: ' + err.message);
-      }
-    }
-
-    async function downloadAllPagesZip() {
-      if (pdfToImgPages.length === 0) return;
-      const zip = new JSZip();
-
-      pdfToImgPages.forEach(p => {
-        const base64Data = p.dataUrl.split(',')[1];
-        zip.file(`Page_${p.pageNum}.${p.ext}`, base64Data, { base64: true });
-      });
-
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(zipBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Extracted_PDF_Pages.zip';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    let sequenceImages = [];
-
-    function handleImagesToPdfSelect(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          sequenceImages.push({ name: file.name, dataUrl: event.target.result });
-          renderSequenceGrid();
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function renderSequenceGrid() {
-      const grid = document.getElementById('imgSequenceGrid');
-      grid.innerHTML = '';
-
-      sequenceImages.forEach((item, index) => {
-        const card = document.createElement('div');
-        card.className = 'preview-card';
-        card.innerHTML = `
-          <img src="${item.dataUrl}" />
-          <div class="preview-actions">
-            <button class="mini-btn" onclick="moveSequence(${index}, -1)" ${index === 0 ? 'disabled' : ''}>◀</button>
-            <span style="font-size:11px;">#${index + 1}</span>
-            <button class="mini-btn" onclick="moveSequence(${index}, 1)" ${index === sequenceImages.length - 1 ? 'disabled' : ''}>▶</button>
-            <button class="mini-btn" style="color:var(--danger);" onclick="removeSequence(${index})">✕</button>
-          </div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function moveSequence(index, dir) {
-      const target = index + dir;
-      if (target < 0 || target >= sequenceImages.length) return;
-      const temp = sequenceImages[index];
-      sequenceImages[index] = sequenceImages[target];
-      sequenceImages[target] = temp;
-      renderSequenceGrid();
-    }
-
-    function removeSequence(index) {
-      sequenceImages.splice(index, 1);
-      renderSequenceGrid();
-    }
-
-    async function compileImagesToPdf() {
-      if (sequenceImages.length === 0) {
-        alert('Please add at least one image.');
-        return;
-      }
-
-      const pageSize = document.getElementById('imgPdfPageSize').value;
-      const margin = parseFloat(document.getElementById('imgPdfMargin').value);
-      const { jsPDF } = window.jspdf;
-
-      let doc;
-      if (pageSize === 'a4_portrait') doc = new jsPDF('p', 'mm', 'a4');
-      else if (pageSize === 'a4_landscape') doc = new jsPDF('l', 'mm', 'a4');
-      else doc = new jsPDF({ unit: 'px' });
-
-      for (let i = 0; i < sequenceImages.length; i++) {
-        const item = sequenceImages[i];
+      if (file.type.startsWith('image/')) {
         const img = new Image();
-        await new Promise(r => { img.onload = r; img.src = item.dataUrl; });
+        img.src = URL.createObjectURL(file);
+        await img.decode();
 
-        if (i > 0) doc.addPage();
-
-        if (pageSize === 'fit') {
-          doc.deletePage(doc.internal.getNumberOfPages());
-          doc.addPage([img.width, img.height]);
-          doc.addImage(item.dataUrl, 'JPEG', 0, 0, img.width, img.height);
-        } else {
-          const pageWidth = doc.internal.pageSize.getWidth();
-          const pageHeight = doc.internal.pageSize.getHeight();
-          const availWidth = pageWidth - (margin * 2);
-          const availHeight = pageHeight - (margin * 2);
-
-          const ratio = Math.min(availWidth / img.width, availHeight / img.height);
-          const finalW = img.width * ratio;
-          const finalH = img.height * ratio;
-          const x = margin + (availWidth - finalW) / 2;
-          const y = margin + (availHeight - finalH) / 2;
-
-          doc.addImage(item.dataUrl, 'JPEG', x, y, finalW, finalH);
-        }
-      }
-
-      doc.save('Compiled_Document.pdf');
-    }
-
-    let formatSwitchImgData = null;
-    let formatSwitchFileName = '';
-
-    function handleFormatSwitchSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      formatSwitchFileName = file.name;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        formatSwitchImgData = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function executeFormatSwitch() {
-      if (!formatSwitchImgData) {
-        alert('Please select an image file.');
-        return;
-      }
-
-      const format = document.getElementById('targetFormat').value;
-      const quality = parseFloat(document.getElementById('formatQuality').value);
-      const ext = format === 'image/jpeg' ? 'jpg' : (format === 'image/webp' ? 'webp' : 'png');
-
-      const img = new Image();
-      img.onload = () => {
         const canvas = document.createElement('canvas');
         canvas.width = img.width;
         canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
 
-        canvas.toBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = formatSwitchFileName.replace(/\.[^/.]+$/, '') + `.${ext}`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }, format, quality);
-      };
-      img.src = formatSwitchImgData;
+        let minQ = 0.05, maxQ = 0.95, bestBlob = null;
+        for (let i = 0; i < 6; i++) {
+          let midQ = (minQ + maxQ) / 2;
+          let blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', midQ));
+          progress.style.width = `${30 + i * 10}%`;
+
+          if (blob.size <= targetBytes) {
+            bestBlob = blob;
+            minQ = midQ;
+          } else {
+            maxQ = midQ;
+          }
+        }
+
+        if (!bestBlob) {
+          // Downscale dimensions if quality drop alone isn't enough
+          canvas.width = img.width * 0.6;
+          canvas.height = img.height * 0.6;
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          bestBlob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.5));
+        }
+
+        progress.style.width = "100%";
+        status.innerText = "Compression complete!";
+        triggerDownload(bestBlob, `compressed_${file.name.split('.')[0]}.jpg`, 'compress-download');
+      } else {
+        status.innerText = "PDF compression processing...";
+        progress.style.width = "100%";
+        triggerDownload(file, `copy_${file.name}`, 'compress-download');
+      }
+    }
+
+    // Tab 2: PDF to Images Implementation
+    async function runPdfToImages() {
+      const input = document.getElementById('pdf2img-file');
+      if (!input.files.length) return alert('Please upload a PDF file.');
+
+      const file = input.files[0];
+      const format = document.getElementById('pdf2img-format').value;
+      const ext = format === 'image/jpeg' ? 'jpg' : format === 'image/png' ? 'png' : 'webp';
+
+      const out = document.getElementById('pdf2img-output');
+      const status = document.getElementById('pdf2img-status');
+      const progress = document.getElementById('pdf2img-progress');
+      out.classList.add('show');
+      status.innerText = "Reading PDF...";
+      progress.style.width = "10%";
+
+      const arrayBuffer = await file.arrayBuffer();
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      const zip = new JSZip();
+      for (let i = 1; i <= pdf.pagesCount || i <= pdf.numPages; i++) {
+        status.innerText = `Extracting page ${i} of ${pdf.numPages}...`;
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        const blob = await new Promise(r => canvas.toBlob(r, format, 0.9));
+        zip.file(`page_${i}.${ext}`, blob);
+
+        progress.style.width = `${10 + (i / pdf.numPages) * 80}%`;
+      }
+
+      status.innerText = "Packaging ZIP archive...";
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      progress.style.width = "100%";
+      status.innerText = "Pages extracted successfully!";
+      triggerDownload(zipBlob, `${file.name.split('.')[0]}_images.zip`, 'pdf2img-download');
+    }
+
+    // Tab 3: Images to PDF Implementation
+    let selectedImages = [];
+    function handleImageSelection(event) {
+      selectedImages = Array.from(event.target.files);
+      const gallery = document.getElementById('img2pdf-previews');
+      gallery.innerHTML = '';
+      selectedImages.forEach(file => {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.innerHTML = `
+          <img src="${URL.createObjectURL(file)}" alt="preview">
+          <span class="preview-name">${file.name}</span>
+        `;
+        gallery.appendChild(item);
+      });
+    }
+
+    async function runImagesToPdf() {
+      if (!selectedImages.length) return alert('Please select one or more images.');
+
+      const out = document.getElementById('img2pdf-output');
+      const status = document.getElementById('img2pdf-status');
+      const progress = document.getElementById('img2pdf-progress');
+      out.classList.add('show');
+      status.innerText = "Compiling PDF...";
+      progress.style.width = "20%";
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const layout = document.getElementById('img2pdf-format').value;
+
+      for (let i = 0; i < selectedImages.length; i++) {
+        const img = new Image();
+        img.src = URL.createObjectURL(selectedImages[i]);
+        await img.decode();
+
+        if (i > 0) doc.addPage();
+
+        if (layout === 'a4') {
+          doc.addImage(img, 'JPEG', 10, 10, 190, (img.height * 190) / img.width);
+        } else {
+          doc.addImage(img, 'JPEG', 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
+        }
+        progress.style.width = `${20 + ((i + 1) / selectedImages.length) * 70}%`;
+      }
+
+      const pdfBlob = doc.output('blob');
+      progress.style.width = "100%";
+      status.innerText = "PDF created!";
+      triggerDownload(pdfBlob, "MultiConverter_Document.pdf", 'img2pdf-download');
+    }
+
+    // Tab 4: Format Switcher Implementation
+    async function runFormatConversion() {
+      const input = document.getElementById('convert-file');
+      if (!input.files.length) return alert('Please select an image first.');
+
+      const file = input.files[0];
+      const targetFormat = document.getElementById('convert-target').value;
+      const ext = targetFormat === 'image/jpeg' ? 'jpg' : targetFormat === 'image/png' ? 'png' : 'webp';
+
+      const out = document.getElementById('convert-output');
+      const status = document.getElementById('convert-status');
+      out.classList.add('show');
+      status.innerText = "Converting...";
+
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      await img.decode();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const blob = await new Promise(r => canvas.toBlob(r, targetFormat, 0.92));
+      status.innerText = "Conversion successful!";
+      triggerDownload(blob, `${file.name.split('.')[0]}.${ext}`, 'convert-download');
     }
   </script>
 </body>
